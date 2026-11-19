@@ -66,6 +66,18 @@
     window.addEventListener('orientationchange', function () { setTimeout(altezza, 350); });
     setTimeout(altezza, 500); setTimeout(altezza, 1500);
     // l'app dice quale tema usa: lo sfondo intorno prende lo stesso colore, e la prossima apertura parte gia' giusta
+    // "Resta connesso": l'app lascia qui il suo gettone di accesso (mai il PIN) e lo riprende quando si apre
+    var daGoogle = function (o) { return /^https:\/\/([a-z0-9-]+\.)*(googleusercontent\.com|script\.google\.com)$/.test(o); };
+    window.addEventListener('message', function (ev) {
+      var d = ev.data; if (!d || !daGoogle(ev.origin)) return;
+      if (d.msc === 'pronto') {
+        var acc = null; try { acc = JSON.parse(localStorage.getItem('msc_accesso') || 'null'); } catch (e) {}
+        if (ev.source) ev.source.postMessage({ msc: 'cred', c: acc && acc.c || '', t: acc && acc.t || '' }, ev.origin);
+        return;
+      }
+      if (d.msc === 'cred' && d.c && d.t) { try { localStorage.setItem('msc_accesso', JSON.stringify({ c: String(d.c), t: String(d.t) })); } catch (e) {} return; }
+      if (d.msc === 'esci') { try { localStorage.removeItem('msc_accesso'); } catch (e) {} return; }
+    });
     window.addEventListener('message', function (ev) {
       var d = ev.data; if (!d || d.msc !== 'tema') return;
       var t = d.tema === 'chiaro' ? 'chiaro' : 'scuro';
