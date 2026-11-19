@@ -47,6 +47,24 @@
     f.id = 'app'; f.src = LINK_APP; f.allow = 'clipboard-write; fullscreen';
     f.onload = function () { setTimeout(function () { document.getElementById('avvio').className = 'via'; }, 300); };
     document.body.appendChild(f);
+    // iPhone dalla Home: la pagina passa sotto la barra in alto ma l'iPhone la crede piu' corta dello schermo,
+    // cosi' l'app (e la barra delle icone) resta sollevata dal fondo. Qui la allungo fino al fondo vero.
+    var sonda = document.createElement('div');
+    sonda.style.cssText = 'position:fixed;top:0;left:0;width:0;visibility:hidden;pointer-events:none;height:env(safe-area-inset-top)';
+    document.body.appendChild(sonda);
+    var altezza = function () {
+      var h = window.innerHeight;
+      if (window.navigator.standalone && sonda.offsetHeight > 0) {
+        var orizz = Math.abs(window.orientation || 0) === 90;
+        var schermo = orizz ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+        if (schermo > h && schermo - h < 120) h = schermo;
+      }
+      f.style.height = h + 'px'; f.style.bottom = 'auto';
+    };
+    altezza();
+    window.addEventListener('resize', altezza);
+    window.addEventListener('orientationchange', function () { setTimeout(altezza, 350); });
+    setTimeout(altezza, 500); setTimeout(altezza, 1500);
     // l'app dice quale tema usa: lo sfondo intorno prende lo stesso colore, e la prossima apertura parte gia' giusta
     window.addEventListener('message', function (ev) {
       var d = ev.data; if (!d || d.msc !== 'tema') return;
