@@ -7,14 +7,23 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MS Coaching">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+  // tema salvato all'ultima apertura: decide colore di sfondo e barra di stato prima che si veda qualcosa
+  var TEMA = 'scuro'; try { if (localStorage.getItem('msc_tema_ingresso') === 'chiaro') TEMA = 'chiaro'; } catch (e) {}
+  var SFONDO = { scuro: '#0B0810', chiaro: '#F5F1F7' };
+  // barra di stato "default": l'app parte sotto la barra e arriva fino al fondo. Con "black-translucent" l'iPhone lascia una fascia nera in basso.
+  document.write('<meta name="theme-color" content="' + SFONDO[TEMA] + '">');
+  document.documentElement.style.background = SFONDO[TEMA];
+</script>
 <link rel="apple-touch-icon" href="icona-180.png">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
-  html,body{margin:0;height:100%;background:#0E0A12}
-  #app{position:fixed;inset:0;width:100%;height:100%;border:0;display:block}
-  #avvio{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0E0A12;transition:opacity .4s}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background:inherit;transition:background-color .25s}
+  #app{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:0;display:block;background:inherit}
+  #avvio{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:inherit;transition:opacity .4s}
   #avvio img{width:88px;height:88px;border-radius:22px}
   #avvio.via{opacity:0;pointer-events:none}
 </style>
@@ -30,7 +39,7 @@
   // modo "apri": se l'app dentro la pagina desse problemi, aggiungi ?apri al link oppure cambia false in true
   var APRI = false || /[?&]apri\b/.test(location.search);
   if (!/^https:\/\//.test(LINK_APP)) {
-    document.getElementById('avvio').innerHTML = '<p style="color:#fff;font:15px Arial;padding:24px;text-align:center">Manca il link dell\'app in index.html</p>';
+    document.getElementById('avvio').innerHTML = '<p style="color:#888;font:15px Arial;padding:24px;text-align:center">Manca il link dell\'app in index.html</p>';
   } else if (APRI) {
     location.replace(LINK_APP);
   } else {
@@ -38,6 +47,14 @@
     f.id = 'app'; f.src = LINK_APP; f.allow = 'clipboard-write; fullscreen';
     f.onload = function () { setTimeout(function () { document.getElementById('avvio').className = 'via'; }, 300); };
     document.body.appendChild(f);
+    // l'app dice quale tema usa: lo sfondo intorno prende lo stesso colore, e la prossima apertura parte gia' giusta
+    window.addEventListener('message', function (ev) {
+      var d = ev.data; if (!d || d.msc !== 'tema') return;
+      var t = d.tema === 'chiaro' ? 'chiaro' : 'scuro';
+      document.documentElement.style.background = SFONDO[t];
+      var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', SFONDO[t]);
+      try { localStorage.setItem('msc_tema_ingresso', t); } catch (e) {}
+    });
     setTimeout(function () { document.getElementById('avvio').className = 'via'; }, 6000);
   }
 </script>
