@@ -777,7 +777,7 @@ function coRAgenda(){var d=CO.agenda,h='<div class="co-h"><div><div class="eyebr
   h+='</div><div class="co-card"><h3>Confermati</h3>'+(conf.length?conf.map(function(a){return riga(a,'<span class="co-pill ok">Confermato</span><button class="co-btn mini rosso" data-st="Annullato" data-r="'+a.riga+'">Annulla</button>')}).join(''):'<div class="co-vuoto">Nessun appuntamento in programma.</div>')+'</div>';
   if(d.passati.length)h+='<div class="co-card"><h3>Passati</h3>'+d.passati.map(function(a){return riga(a)}).join('')+'</div>';
   $('coMain').innerHTML=h;
-  tutti('#coMain [data-st]').forEach(function(b){b.onclick=function(){var st=b.dataset.st,r=+b.dataset.r,m=$('cm'+r),fai=function(){b.disabled=true;coChiama('co_stato',[r,st,m?m.value:''],function(n){CO.agenda=n;if(CO.home){CO.home.attesa=n.futuri.filter(function(a){return a.stato==='In attesa'}).length;coBadge()}coRAgenda();toast(st==='Confermato'?'Confermato':st==='Rifiutato'?'Rifiutato':'Annullato')},function(t){b.disabled=false;toast(t)})};
+  tutti('#coMain [data-st]').forEach(function(b){b.onclick=function(){var st=b.dataset.st,r=b.dataset.r,m=$('cm'+r),fai=function(){b.disabled=true;coChiama('co_stato',[r,st,m?m.value:''],function(n){CO.agenda=n;if(CO.home){CO.home.attesa=n.futuri.filter(function(a){return a.stato==='In attesa'}).length;coBadge()}coRAgenda();toast(st==='Confermato'?'Confermato':st==='Rifiutato'?'Rifiutato':'Annullato')},function(t){b.disabled=false;toast(t)})};
     if(st==='Annullato')coChiedi('Annullare l\'appuntamento?','Tolgo l\'evento dal tuo calendario e il cliente lo vede annullato nell\'app.','Annulla appuntamento',fai,'Indietro');else fai()}})}
 
 // ---------- aderenza
