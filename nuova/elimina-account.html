@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MS Coaching · Elimina account</title>
+<style>:root{--bg:#0e0a12;--card:#1a1420;--line:#2e2536;--txt:#f3eef6;--muted:#a79bb0;--brand:#c9a6d8;--bad:#f08a8a;--good:#6fd6a8}@media (prefers-color-scheme:light){:root{--bg:#f7f4f9;--card:#fff;--line:#e4dce9;--txt:#1e1424;--muted:#6d6175;--brand:#530059}}*{box-sizing:border-box}body{background:var(--bg);min-height:100vh;color:var(--txt);justify-content:center;align-items:center;margin:0;padding:24px 16px;font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;display:flex}.box{background:var(--card);border:1px solid var(--line);border-radius:20px;width:100%;max-width:380px;padding:28px 22px}.marchio{letter-spacing:.18em;color:var(--brand);font-size:13px;font-weight:800}h1{margin:10px 0 6px;font-size:24px}p{color:var(--muted);margin:0 0 18px}label{color:var(--muted);margin:14px 0 6px;font-size:13px;display:block}input{border:1px solid var(--line);width:100%;height:48px;color:var(--txt);background:0 0;border-radius:12px;padding:0 14px;font-size:16px}button{background:var(--brand);width:100%;height:50px;color:var(--bg);border:0;border-radius:14px;margin-top:20px;font-size:16px;font-weight:700}button:disabled{opacity:.5}.err{color:var(--bad);min-height:22px;margin-top:10px;font-size:14px}.ok{color:var(--good);font-weight:600}.rosso{background:var(--bad);color:#1a0b0b}.chk{color:var(--muted);align-items:flex-start;gap:10px;margin-top:16px;font-size:14px;display:flex}.chk input{flex:none;width:20px;height:20px;margin:1px 0 0}ul{color:var(--muted);margin:0 0 14px;padding-left:20px;font-size:14px}small{color:var(--muted);margin-top:18px;font-size:12.5px;display:block}</style>
+  <script type="module" crossorigin src="./assets/elimina-D7QFmL-1.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/dist-DKQ6MUN9.js">
+</head>
+<body>
+<main class="box" id="box">
+  <div class="marchio">MS COACHING</div>
+  <h1>Elimina il tuo account</h1>
+  <p id="sotto">Qui cancelli il tuo account dell'app MS Coaching e tutti i tuoi dati. Puoi farlo anche dall'app: Profilo &gt; Elimina account.</p>
+  <ul>
+    <li>Vengono cancellati subito: account, allenamenti, misure, foto dei progressi, chat, video di esecuzione e appuntamenti.</li>
+    <li>Non si può annullare. Se vuoi una copia, prima scaricala dall'app: Profilo &gt; Scarica i miei dati.</li>
+  </ul>
+  <form id="f">
+    <label for="em">Email con cui entri nell'app</label>
+    <input id="em" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" maxlength="72" required>
+    <label class="chk"><input type="checkbox" id="ok"> Ho capito: voglio cancellare per sempre il mio account e i miei dati.</label>
+    <button id="vai" type="submit" class="rosso">Elimina per sempre</button>
+    <div class="err" id="err" role="alert"></div>
+  </form>
+  <small>Password dimenticata? Nell'app tocca "Password dimenticata?" nella schermata di accesso. Oppure chiedi al tuo coach di cancellare l'account per te.</small>
+</main>
+</body>
+</html>
