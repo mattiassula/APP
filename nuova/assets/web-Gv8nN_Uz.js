@@ -1,0 +1,1 @@
+import{i as e}from"./main-4vrc2lx0.js";var t=class extends e{async show(e){}async hide(e){}};export{t as SplashScreenWeb};
