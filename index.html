@@ -1703,6 +1703,11 @@ function coSettLega(){var P=CO.prog,piu=$('coPiuS'),meno=$('coMenoS');
   if(piu)piu.onclick=function(){coAllunga(P.W+1);coSporco(true);rProg();toast('Aggiunta la settimana '+P.W+'. Premi Salva per confermare.')};
   if(meno)meno.onclick=function(){var w=P.W;coChiedi('Togliere la settimana '+w+'?','Il programma passa a '+(w-1)+' settimane. Finché non premi Salva non cambia niente per il cliente.','Togli',function(){P.settimane.pop();P.W=P.settimane.length;
     P.sedute.forEach(function(s){s.esercizi.forEach(function(e){if(e.sett)delete e.sett[w]})});coSporco(true);rProg()})}}
+// progressione per settimana (Matti 27/11): quello che scrivi in una settimana vale anche per tutte quelle a destra,
+// finche' non scrivi un altro cambio. Qui si aggiornano subito i valori in grigio (e la colonna Sett 1 se cambi la base).
+function coAggProgr(j){var P=CO.prog;if(!P)return;var s=P.sedute[CO.sed],e=s&&s.esercizi[j];if(!e)return;
+  var b=document.querySelector('#coMain td[data-base="'+j+'"]');if(b)b.textContent=(e.serie||'-')+' × '+(e.rip||'-')+(e.rir?' · '+e.rir:'');
+  tutti('#coMain input[data-e="'+j+'"][data-w]').forEach(function(i){var ph=coEff(e,+i.dataset.w,i.dataset.c);if(i.placeholder!==String(ph))i.placeholder=ph})}
 
 // Area coach dal telefono (Matti 26/11, "Controllare e rispondere"): sotto i 760px la barra delle sezioni va in basso
 // come nell'app del cliente, con Oggi, Clienti, Appuntamenti, Chat e "Altro" (Aderenza, Contenuti, Esercizi, Tema, Esci).
@@ -2081,10 +2086,10 @@ function rProg(){var P=CO.prog,sc=coSettCorr(),h='';
   if(CO.vedSett&&s.esercizi.length){h+='<div class="co-scroll" style="margin-top:16px"><table class="co-t co-prog"><thead><tr><th class="en">Esercizio</th><th class="wk">Sett 1</th>';
     for(var w=2;w<=P.W;w++)h+='<th class="wk">Sett '+w+'<br><span style="letter-spacing:.06em">Serie · Rip · RIR</span></th>';
     h+='</tr></thead><tbody>';
-    s.esercizi.forEach(function(e,j){h+='<tr><td class="en" title="'+esc(e.nome)+'">'+(esc(e.nome)||'<span style="color:var(--muted)">Esercizio '+(j+1)+'</span>')+'</td><td class="wk" style="white-space:nowrap;color:var(--ink-2)">'+esc(e.serie||'-')+' × '+esc(e.rip||'-')+(e.rir?' · '+esc(e.rir):'')+'</td>';
+    s.esercizi.forEach(function(e,j){h+='<tr><td class="en" title="'+esc(e.nome)+'">'+(esc(e.nome)||'<span style="color:var(--muted)">Esercizio '+(j+1)+'</span>')+'</td><td class="wk" data-base="'+j+'" style="white-space:nowrap;color:var(--ink-2)">'+esc(e.serie||'-')+' × '+esc(e.rip||'-')+(e.rir?' · '+esc(e.rir):'')+'</td>';
       for(var w=2;w<=P.W;w++){var o=(e.sett&&e.sett[w])||{};h+='<td class="wk"><div class="tre"><input data-e="'+j+'" data-w="'+w+'" data-c="serie" value="'+esc(o.serie||'')+'" placeholder="'+esc(coEff(e,w,'serie'))+'" maxlength="2" inputmode="numeric"><input data-e="'+j+'" data-w="'+w+'" data-c="rip" value="'+esc(o.rip||'')+'" placeholder="'+esc(coEff(e,w,'rip'))+'" maxlength="20"><input data-e="'+j+'" data-w="'+w+'" data-c="rir" value="'+esc(o.rir||'')+'" placeholder="'+esc(coEff(e,w,'rir'))+'" maxlength="10"></div></td>'}
       h+='</tr>'});
-    h+='</tbody></table></div><div class="co-nota">In grigio quello che vale già (dalla settimana prima). Scrivi solo dove cambia.</div>'}
+    h+='</tbody></table></div><div class="co-nota">Un cambio vale anche per tutte le settimane a destra, finché non ne scrivi un altro: in grigio quello che vale già. Svuota una casella per tornare al valore di prima.</div>'}
   h+='</div><div class="co-card" id="coGrafW"></div>';
   $('coTab').innerHTML=h;
   $('dlEs').innerHTML=P.esercizi.map(function(n){return'<option value="'+esc(n)+'">'}).join('');
@@ -2106,7 +2111,7 @@ function coInput(ev){var t=ev.target,P=CO.prog;if(!P||CO.vista!=='cliente'||CO.t
   else if(d.sn){s[d.sn]=v}
   else if(d.e!=null&&d.c){var e=s.esercizi[+d.e];if(!e)return;if(d.w){e.sett=e.sett||{};var o=e.sett[d.w]||(e.sett[d.w]={serie:'',rip:'',rir:''});o[d.c]=v}else e[d.c]=v;
     if(d.c==='nome'){var lista={};P.esercizi.forEach(function(n){lista[n.toLowerCase()]=1});t.closest('tr').classList.toggle('fuori',!!(v&&!lista[v.toLowerCase()]))}
-    if(/^(serie|rip|rec|rir|tut|n|nome)$/.test(d.c))coAggTempo()}
+    if(/^(serie|rip|rec|rir|tut|n|nome)$/.test(d.c))coAggTempo();if(/^(serie|rip|rir)$/.test(d.c))coAggProgr(+d.e)}
   else return;
   coSporco(true)}
 function coSalvaProg(forza){var P=CO.prog,b=$('coSalvaB');if(!P)return;
