@@ -1008,11 +1008,12 @@ function slK(){return S.sett+'-'+G}
 function slLeggi(n){try{return +localStorage.getItem('msc_sl'+n+'_'+slK())||0}catch(e){return 0}}
 function slScrivi(n,v){try{localStorage.setItem('msc_sl'+n+'_'+slK(),String(v))}catch(e){}}
 function slMmss(s){s=Math.max(0,Math.round(s));var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':'+(m<10?'0':''):'')+m+':'+(x<10?'0':'')+x}
-function slEs(k){var d=S.giorni[G-1];return d&&d.esercizi.filter(function(x){return x.k===+k})[0]}
+function slEs(k){if(!S||!S.giorni)return null;var d=S.giorni[G-1];return d&&d.esercizi.filter(function(x){return x.k===+k})[0]}
 
 // barra sopra "Avanzamento seduta" (kg sollevati: senza riscaldamento e solo esercizi a peso e ripetizioni, migliorie 25/11)
 function slBarra(d){return'<div class="sl-bar" id="slBar"><div><b id="slT">–</b><span>Tempo</span></div><div><b id="slS">0</b><span>Serie fatte</span></div><div><b id="slKg">0</b><span>Kg sollevati</span></div></div>'}
-function slAgg(){var d=S.giorni[G-1];if(!d||d.riposo||!$('slBar'))return;var fatte=0,kg=0;
+// S e' vuoto nell'area coach e prima dell'accesso: tornando sulla scheda del browser non c'e' niente da aggiornare
+function slAgg(){if(!S||!S.giorni)return;var d=S.giorni[G-1];if(!d||d.riposo||!$('slBar'))return;var fatte=0,kg=0;
   d.esercizi.forEach(function(e){(e.s||[]).forEach(function(q,i){var r=n_(q);if(r!==null&&r>0){fatte++;var k=n_((e.ks||[])[i]);if(k!==null&&(!e.u||e.u.vol)&&(e.t||[])[i]!=='riscaldamento')kg+=k*r}})});
   $('slS').textContent=fatte;$('slKg').textContent=fmt(kg);
   tutti('.es').forEach(function(es){var e=slEs(es.dataset.k);if(!e)return;tutti('.sl-sp',es).forEach(function(b){var j=+b.dataset.sp;b.classList.toggle('on',n_(e.s[j-1])!==null)})});
@@ -1063,7 +1064,7 @@ function slBip(){var a=SL.ac;if(!a)return;try{[0,.22,.44].forEach(function(t,i){
 // schermo sempre acceso durante la seduta
 function slSveglia(on){if(window.MSC_NATIVO){if(!!on!==!!SL.wl){SL.wl=on?1:null;MSC_NATIVO.sveglia(!!on)}return}try{if(on&&!SL.wl&&navigator.wakeLock&&document.visibilityState==='visible'){SL.wl=1;navigator.wakeLock.request('screen').then(function(l){SL.wl=l;l.addEventListener('release',function(){if(SL.wl===l)SL.wl=null})},function(){SL.wl=null})}
   else if(!on&&SL.wl&&SL.wl.release){SL.wl.release();SL.wl=null}}catch(e){SL.wl=null}}
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){slAgg();if(SL.fine)slTic()}});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&S&&S.giorni){slAgg();if(SL.fine)slTic()}});
 
 // record subito, mentre scrive (stesse regole del 19/11)
 function slDopoSalva(c){if(!/^[sk]\d$/.test(c))return;var k=slK(),w=S.sett,g=G;clearTimeout(SL.t);
