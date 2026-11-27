@@ -1784,6 +1784,173 @@ function coCheck(){var cod=CKS.cod;CKS.cod=null;
   $('coMain').innerHTML='<div class="ck-wrap"><iframe id="ckFrame" class="ck-frame" title="Check" src="./check.html'+(cod?'#cliente='+encodeURIComponent(cod):'')+'"></iframe></div>'}
 function coApriCheck(cod){CKS.cod=cod||null;coVai('check')}
 
+// ---------- PDF del programma (Matti 27/11): solo nell'area coach, pulsante "Esporta PDF" nella scheda Programma.
+// Grafica "A, Pulita": prima pagina con logo, calendario delle settimane, sedute, nota di progressione e legenda;
+// poi ogni seduta su una pagina nuova con gli esercizi della settimana 1 e la progressione settimana per settimana.
+// Il PDF si fa nel browser (html2pdf, gia' usato dai report del Check): niente dati mandati altrove. Dentro c'e' solo il codice cliente.
+var PDF_GG=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+var PDF_MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+var PDF_LOGO=null;
+
+// valore di una settimana: l'ultimo cambio fino a quella settimana, altrimenti la base (come nell'editor e nell'app del cliente)
+function pdfVal(e,w,c){for(var x=w;x>=2;x--){var o=e.sett&&e.sett[x];if(o&&o[c]!==''&&o[c]!=null)return String(o[c])}return e[c]==null?'':String(e[c])}
+function pdfCambia(e,w,c){return w>1&&pdfVal(e,w,c)!==pdfVal(e,w-1,c)}
+function pdfIso(r){return/(^|\s)\d+\s*(["″']|s\b|sec)/i.test(String(r||''))}
+function pdfRip(r){r=String(r||'');return/^max$/i.test(r)?'MAX':r}
+function pdfData(s){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null}
+function pdfD(d){return d?d.getDate()+' '+PDF_MESI[d.getMonth()]+' '+d.getFullYear():''}
+function pdfEsc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+// i dati del PDF dal programma aperto nell'editor (anche con modifiche non ancora salvate)
+function pdfDati(P,cod,nome){
+  var sedute=P.sedute.map(function(s,i){return{l:P.lettere[i],nome:s.nome||'',nota:s.nota||'',col:s.colore||'#C9A6D8',es:s.esercizi.filter(function(e){return e&&String(e.nome||'').trim()})}}).filter(function(s){return s.es.length});
+  var ini=pdfData(P.inizio),fine=ini?new Date(ini.getFullYear(),ini.getMonth(),ini.getDate()+P.W*7-1):null;
+  return{cod:cod,nome:nome||'',W:P.W,inizio:ini,fine:fine,obiettivo:P.obiettivo||'',frequenza:P.frequenza||'',nota:P.progressione||'',
+    settimane:P.settimane.slice(0,P.W).map(function(s){return{fase:s.fase||'',giorni:(s.giorni||[]).map(function(g){return g==='Riposo'?'':g||''})}}),sedute:sedute}}
+
+var PDF_CSS='.pdf-pg{width:210mm;height:296.6mm;padding:12mm 13mm 15mm;display:flex;flex-direction:column;position:relative;overflow:hidden;background:#fff radial-gradient(90% 38% at 100% 0,rgba(155,47,163,.10),transparent 62%) no-repeat;color:#1C1022;font-family:"Space Grotesk",-apple-system,"Segoe UI",Roboto,sans-serif;box-sizing:border-box;line-height:1.4}'+
+'.pdf-pg *{box-sizing:border-box}.pdf-corpo{flex:1 1 auto;min-height:0;overflow:hidden}.pdf-m{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.16em;font-weight:500}'+
+'.pdf-pie{position:absolute;left:13mm;right:13mm;bottom:7mm;display:flex;justify-content:space-between;font-size:7pt;color:#8a7d92;border-top:1px solid rgba(122,74,136,.14);padding-top:2.4mm}'+
+// intestazione: logo grande nella prima pagina, piccolo nelle altre
+'.pdf-hd{display:flex;align-items:center;justify-content:space-between;gap:6mm;margin-bottom:5mm}.pdf-hd img{height:27mm;width:auto;display:block}.pdf-hd.pic img{height:15mm}.pdf-hd.pic{margin-bottom:4mm}'+
+'.pdf-hd .r{text-align:right;font-size:7.5pt;color:#7A1C82}.pdf-hd .r b{display:block;font-family:"Space Grotesk",sans-serif;text-transform:none;letter-spacing:0;font-size:11pt;color:#1C1022;margin-top:1mm;font-weight:700}'+
+// riquadro scuro come nell'app (Allenamento di oggi, Il tuo percorso)
+'.pdf-eroe{background:linear-gradient(100deg,#120A18 0%,#2A0632 52%,#5E0A69 100%);border-radius:5mm;padding:6mm 7mm;color:#fff;margin-bottom:5mm}'+
+'.pdf-eroe .ey{font-size:7.5pt;color:#DDBDEA;display:flex;align-items:center;gap:2mm}.pdf-eroe .ey i{width:2.2mm;height:2.2mm;border-radius:50%;display:inline-block;background:#5FD6A8}'+
+'.pdf-eroe h1{margin:1.6mm 0 1mm;font-size:25pt;line-height:1.08;font-weight:700;letter-spacing:-.01em}.pdf-eroe .sot{font-size:10pt;color:#E9DDF0}.pdf-eroe .sot b{color:#fff}'+
+'.pdf-eroe .chips{display:flex;flex-wrap:wrap;gap:2mm;margin-top:3.4mm}.pdf-eroe .chips span{background:rgba(233,200,245,.14);border:1px solid rgba(233,200,245,.30);color:#F3E6F8;border-radius:10mm;padding:1.2mm 3.2mm;font-size:8.5pt}'+
+'.pdf-eroe.mini{padding:3.4mm 6mm;margin-bottom:2.6mm;border-radius:4mm}.pdf-eroe.mini h1{font-size:16pt;margin:.8mm 0 .4mm}.pdf-eroe.mini .sot{font-size:9pt}'+
+'.pdf-eroe .nota{margin-top:2.6mm;font-size:9.5pt;color:#E9DDF0;white-space:pre-line}'+
+'.pdf-lab{font-size:7.5pt;color:#7D6E86;margin:5mm 0 2.4mm}'+
+'.pdf-card{background:#fff;border:1px solid rgba(122,74,136,.16);border-radius:4mm;padding:3.4mm 4.4mm;box-shadow:0 3mm 8mm -6mm rgba(60,20,70,.22)}'+
+'.pdf-lt{display:inline-flex;align-items:center;justify-content:center;width:6.8mm;height:6.8mm;border-radius:2mm;color:#1C1022;font-weight:700;font-size:9.5pt;line-height:1}'+
+'.pdf-pg table{width:100%;border-collapse:collapse}'+
+'.pdf-cal{background:#fff;border:1px solid rgba(122,74,136,.16);border-radius:4mm;overflow:hidden}.pdf-cal th{font-family:"JetBrains Mono",monospace;font-size:6.8pt;letter-spacing:.12em;text-transform:uppercase;color:#7D6E86;font-weight:500;padding:2mm 1.6mm;background:#F6F0F8;text-align:center}.pdf-cal th:nth-child(2){text-align:left}'+
+'.pdf-cal td{padding:1.2mm 1.6mm;text-align:center;border-top:1px solid rgba(122,74,136,.08);font-size:9.5pt}.pdf-cal td:first-child{font-weight:700;width:14mm}.pdf-cal td.fa{text-align:left;color:#4A3C52}.pdf-cal .rp{color:#cbbfd1}'+
+'.pdf-sed{display:flex;flex-wrap:wrap;gap:3mm}.pdf-sed .pdf-card{flex:1 1 50mm;display:flex;align-items:center;gap:3mm}.pdf-sed b{display:block;font-size:10.5pt}.pdf-sed span.n{font-size:8.5pt;color:#7D6E86}'+
+'.pdf-nt{font-size:10pt;line-height:1.55;margin:0;white-space:pre-line}'+
+'.pdf-come{background:rgba(155,47,163,.08);border-radius:4mm;padding:3.6mm 4.6mm;font-size:8.6pt;line-height:1.65;color:#4A3C52;margin-top:5mm}.pdf-come b{color:#7A1C82}'+
+// esercizio come nell'app: numero, nome, pillole, nota del coach
+'.pdf-es{display:flex;gap:3.4mm;align-items:flex-start;margin-bottom:2.4mm}.pdf-es .num{font-family:"JetBrains Mono",monospace;color:#9B2FA3;font-size:9pt;padding-top:.6mm;width:6mm;flex:none}'+
+'.pdf-es .tx{flex:1;min-width:0}.pdf-es .nm{font-size:11.5pt;font-weight:700}.pdf-pills{display:flex;flex-wrap:wrap;gap:1.6mm;margin-top:1.6mm}.pdf-pills span{background:rgba(155,47,163,.13);color:#7A1C82;border-radius:10mm;padding:.9mm 2.8mm;font-size:8.6pt;font-weight:600}.pdf-pills span.t{background:#fff;box-shadow:0 0 0 1px rgba(122,28,130,.30) inset}'+
+'.pdf-nota{margin-top:1.8mm;font-size:8.8pt;color:#4A3C52;background:#FBF7FC;border-left:2px solid #C9A6D8;border-radius:0 2mm 2mm 0;padding:1.4mm 2.6mm;white-space:pre-line}.pdf-nota b{color:#7A1C82;font-weight:600}'+
+// progressione
+'.pdf-pr{background:#fff;border:1px solid rgba(122,74,136,.16);border-radius:4mm;overflow:hidden}.pdf-pr th{font-family:"JetBrains Mono",monospace;font-size:6.8pt;letter-spacing:.1em;color:#7D6E86;font-weight:500;padding:2mm 1mm;background:#F6F0F8;text-align:center}.pdf-pr th:first-child{text-align:left;padding-left:3mm}'+
+'.pdf-pr td{font-size:8.2pt;padding:1.6mm 1mm;border-top:1px solid rgba(122,74,136,.08);text-align:center;vertical-align:top}.pdf-pr td:first-child{text-align:left;font-weight:600;font-size:8.6pt;width:40mm;padding-left:3mm;padding-right:2mm}'+
+'.pdf-pr td i{display:block;font-style:normal;color:#7D6E86;font-size:7.3pt}.pdf-pr td.ch{background:rgba(155,47,163,.10)}.pdf-pr td.ch b{color:#7A1C82}'+
+'.pdf-leg2{font-size:7.6pt;color:#7D6E86;margin:2mm 0 0}.pdf-sw{display:inline-block;width:3mm;height:3mm;background:rgba(155,47,163,.14);border-radius:.8mm;vertical-align:-.4mm;margin-right:1.4mm}'+
+// settimana per settimana: seduta e caselle da compilare come nell'app
+'.pdf-sdh{display:flex;align-items:center;gap:2.6mm;margin:2mm 0 1.4mm;font-size:7.5pt;color:#7D6E86}.pdf-sdh b{font-family:"Space Grotesk",sans-serif;text-transform:none;letter-spacing:0;font-size:12pt;color:#1C1022}'+
+'.pdf-wx{display:flex;gap:3mm;align-items:center;margin-bottom:1.3mm;padding:1.5mm 3.2mm}.pdf-wx .tx{flex:1;min-width:0}.pdf-wx .nm{font-size:10.5pt;font-weight:700}.pdf-wx .pdf-pills{margin-top:1.2mm}.pdf-wx .pdf-pills span{font-size:7.8pt;padding:.7mm 2.4mm}.pdf-wx .pdf-nota{font-size:8pt}'+
+'.pdf-box{display:flex;gap:1.4mm;flex:none}.pdf-box div{position:relative;width:13.4mm;border:1px solid rgba(122,74,136,.26);border-radius:2mm;padding:.5mm 1.2mm;background:#FBF8FC}.pdf-box small{position:absolute;left:1.2mm;top:.9mm;font-family:"JetBrains Mono",monospace;font-size:6pt;color:#9B2FA3}.pdf-box i{display:block;font-style:normal;font-size:6pt;color:#B3A6BA;text-align:right;height:4.3mm;line-height:4.3mm;border-bottom:1px dotted rgba(122,74,136,.26)}.pdf-box i:last-child{border-bottom:0}';
+
+function pdfPills(e,w){var r=pdfRip(pdfVal(e,w,'rip')),rir=pdfVal(e,w,'rir'),pct=e.p1rm?pdfVal(e,w,'pct'):'';
+  return'<div class="pdf-pills"><span>'+pdfEsc((pdfVal(e,w,'serie')||'–')+' × '+(r||'–')+(pdfIso(r)?' tenuta':''))+'</span>'+(rir!==''?'<span>RIR '+pdfEsc(rir)+'</span>':'')+(e.rec?'<span>Rec '+pdfEsc(e.rec)+'</span>':'')+
+    (pct?'<span>'+pdfEsc(pct)+'% 1RM</span>':'')+(e.tut?'<span>TUT '+pdfEsc(e.tut)+'</span>':'')+(e.tecnica?'<span class="t">'+pdfEsc(e.tecnica)+'</span>':'')+'</div>'}
+function pdfNota(e){return e.note&&String(e.note).trim()?'<div class="pdf-nota"><b>Nota del coach</b> · '+pdfEsc(String(e.note).trim())+'</div>':''}
+
+// contenuto a blocchi: {html} oppure {tab,cls,testa,riga} (righe di tabella) oppure {nuova:true} per iniziare una pagina
+function pdfBlocchi(D){
+  var b=[],per=pdfD(D.inizio)+(D.fine?' – '+pdfD(D.fine):'');
+  var colDi=function(l){var s=D.sedute.filter(function(x){return x.l===l})[0];return s?s.col:'#eee'};
+  var titolo=D.nome||D.cod;
+  b.push({nuova:true,primo:true});
+  b.push({html:'<div class="pdf-eroe"><div class="ey pdf-m"><i></i>Il tuo programma · '+pdfEsc(D.cod)+'</div><h1>'+pdfEsc(titolo)+'</h1><div class="sot"><b>'+D.W+' settimane</b>'+(per?' · '+pdfEsc(per):'')+'</div>'+
+    ((D.obiettivo||D.frequenza)?'<div class="chips">'+(D.obiettivo?'<span>Obiettivo: '+pdfEsc(D.obiettivo)+'</span>':'')+(D.frequenza?'<span>'+pdfEsc(D.frequenza)+'</span>':'')+'</div>':'')+'</div>'});
+  b.push({html:'<div class="pdf-lab pdf-m">Calendario</div>',conProssimo:true});
+  var th='<thead><tr><th>Sett.</th><th>Fase</th>'+PDF_GG.map(function(g){return'<th>'+g+'</th>'}).join('')+'</tr></thead>';
+  D.settimane.forEach(function(s,i){b.push({tab:'cal',cls:'pdf-cal',testa:th,riga:'<tr><td>'+(i+1)+'</td><td class="fa">'+pdfEsc(s.fase)+'</td>'+
+    s.giorni.slice(0,7).map(function(l){return'<td>'+(l?'<span class="pdf-lt" style="background:'+colDi(l)+'">'+pdfEsc(l)+'</span>':'<span class="rp">·</span>')+'</td>'}).join('')+'</tr>'})});
+  b.push({html:'<div class="pdf-lab pdf-m">Le sedute</div><div class="pdf-sed">'+D.sedute.map(function(s){return'<div class="pdf-card"><span class="pdf-lt" style="background:'+s.col+'">'+s.l+'</span><div><b>'+pdfEsc(s.nome||('Seduta '+s.l))+'</b><span class="n">'+s.es.length+(s.es.length===1?' esercizio':' esercizi')+'</span></div></div>'}).join('')+'</div>'});
+  if(D.nota.trim())b.push({html:'<div class="pdf-lab pdf-m">Progressione</div><div class="pdf-card"><p class="pdf-nt">'+pdfEsc(D.nota.trim())+'</p></div>'});
+  b.push({html:'<div class="pdf-come"><b>Come leggere la scheda</b><br>Serie × ripetizioni · <b>RIR</b> = ripetizioni che restano "in tasca" a fine serie · <b>Rec</b> = recupero tra le serie · <b>TUT</b> = tempo di ogni ripetizione · <b>% 1RM</b> = carico sul tuo massimale · <b>40" tenuta</b> = isometria, tieni la posizione per quei secondi. In fondo trovi una pagina per ogni settimana con le caselle per scrivere kg e ripetizioni.</div>'});
+  D.sedute.forEach(function(s){
+    b.push({nuova:true});
+    b.push({html:'<div class="pdf-eroe"><div class="ey pdf-m"><i style="background:'+s.col+'"></i>Seduta '+s.l+' · '+s.es.length+(s.es.length===1?' esercizio':' esercizi')+'</div><h1>'+pdfEsc(s.nome||('Seduta '+s.l))+'</h1>'+(s.nota?'<div class="nota">'+pdfEsc(s.nota)+'</div>':'')+'</div>'});
+    b.push({html:'<div class="pdf-lab pdf-m">Esercizi · valori della settimana 1</div>',conProssimo:true});
+    s.es.forEach(function(e,i){b.push({html:'<div class="pdf-card pdf-es"><div class="num">'+(i<9?'0':'')+(i+1)+'</div><div class="tx"><div class="nm">'+pdfEsc(e.nome)+'</div>'+pdfPills(e,1)+pdfNota(e)+'</div></div>'})});
+    if(D.W>1){
+      // a gruppi di 8 settimane, cosi' la tabella sta nella pagina in verticale
+      for(var a=1;a<=D.W;a+=8){var z=Math.min(D.W,a+7),ws=[];for(var w=a;w<=z;w++)ws.push(w);
+        b.push({html:'<div class="pdf-lab pdf-m">Settimana per settimana'+(D.W>8?' · '+a+'-'+z:'')+'</div>',conProssimo:true});
+        var tp='<thead><tr><th>Esercizio</th>'+ws.map(function(w){return'<th>S'+w+'</th>'}).join('')+'</tr></thead>';
+        s.es.forEach(function(e){b.push({tab:'pr'+s.l+a,cls:'pdf-pr',testa:tp,riga:'<tr><td>'+pdfEsc(e.nome)+'</td>'+ws.map(function(w){
+          var ch=['serie','rip','rir','pct'].some(function(k){return(k!=='pct'||e.p1rm)&&pdfCambia(e,w,k)}),rir=pdfVal(e,w,'rir'),pct=e.p1rm?pdfVal(e,w,'pct'):'';
+          return'<td'+(ch?' class="ch"':'')+'><b>'+pdfEsc(pdfVal(e,w,'serie')+'×'+pdfRip(pdfVal(e,w,'rip')))+'</b>'+(rir!==''?'<i>RIR '+pdfEsc(rir)+'</i>':'')+(pct?'<i>'+pdfEsc(pct)+'%</i>':'')+'</td>'}).join('')+'</tr>'})});
+        b.push({html:'<p class="pdf-leg2"><span class="pdf-sw"></span>cambia rispetto alla settimana prima</p>'});
+      }
+    }
+  });
+  // pagine settimana per settimana, da compilare in palestra (valori gia' giusti per quella settimana)
+  D.settimane.forEach(function(st,wi){var w=wi+1,giorni=[];st.giorni.slice(0,7).forEach(function(l,g){var s=D.sedute.filter(function(x){return x.l===l})[0];if(s)giorni.push([g,s])});
+    if(!giorni.length)return;
+    b.push({nuova:true});
+    b.push({html:'<div class="pdf-eroe mini"><div class="ey pdf-m"><i></i>Settimana '+w+' di '+D.W+(st.fase?' · '+pdfEsc(st.fase):'')+'</div><h1>Settimana '+w+'</h1><div class="sot">'+giorni.map(function(x){return PDF_GG[x[0]]+' '+x[1].l}).join(' · ')+'</div></div>'});
+    giorni.forEach(function(x){var s=x[1];
+      b.push({html:'<div class="pdf-sdh pdf-m"><span class="pdf-lt" style="background:'+s.col+'">'+s.l+'</span>'+PDF_GG[x[0]]+' · <b>'+pdfEsc(s.nome||('Seduta '+s.l))+'</b></div>',conProssimo:true});
+      s.es.forEach(function(e,i){var n=Math.max(1,Math.min(6,parseInt(pdfVal(e,w,'serie'),10)||3)),iso=pdfIso(pdfVal(e,w,'rip'));
+        b.push({html:'<div class="pdf-card pdf-wx"><div class="tx"><div class="nm">'+(i+1)+'. '+pdfEsc(e.nome)+'</div>'+pdfPills(e,w)+pdfNota(e)+'</div><div class="pdf-box">'+
+          Array.apply(null,{length:n}).map(function(_,k){return'<div><small>S'+(k+1)+'</small>'+(iso?'<i>sec</i>':'<i>kg</i><i>rip</i>')+'</div>'}).join('')+'</div></div>'})})});
+  });
+  return{blocchi:b,per:per};
+}
+
+function pdfTesta(D,per,primo){return'<div class="pdf-hd'+(primo?'':' pic')+'"><img src="'+PDF_LOGO+'" alt="MS Coaching"><div class="r pdf-m">'+(primo?'Programma di allenamento':pdfEsc(D.cod))+(primo?'':'<b>'+pdfEsc(D.nome||'Programma di allenamento')+'</b>')+'</div></div>'}
+
+// impagina misurando davvero l'altezza: se un blocco non ci sta va nella pagina dopo; le tabelle ripetono l'intestazione
+function pdfImpagina(box,D){var x=pdfBlocchi(D),pagine=[],pg=null,corpo=null,tab=null,tabK='';
+  function nuova(primo){pg=document.createElement('div');pg.className='pdf-pg';pg.innerHTML=pdfTesta(D,x.per,primo)+'<div class="pdf-corpo"></div><div class="pdf-pie pdf-m"><span>MS Coaching · Mattias Sula</span><span class="pn"></span></div>';
+    box.appendChild(pg);pagine.push(pg);corpo=pg.querySelector('.pdf-corpo');tab=null;tabK=''}
+  // altezza occupata davvero (scrollHeight non basta: con overflow nascosto non scende mai sotto l'altezza della pagina)
+  function usato(){var u=corpo.lastElementChild;if(!u)return 0;var mb=parseFloat(getComputedStyle(u).marginBottom)||0;return u.getBoundingClientRect().bottom+mb-corpo.getBoundingClientRect().top}
+  function pieno(){return usato()>corpo.clientHeight+1}
+  var bl=x.blocchi;
+  for(var i=0;i<bl.length;i++){var k=bl[i];
+    if(k.nuova){nuova(!!k.primo);continue}
+    if(k.html){var d=document.createElement('div');d.innerHTML=k.html;var el=d.firstElementChild&&d.children.length===1?d.firstElementChild:d;corpo.appendChild(el);tab=null;tabK='';
+      // un titolo non resta da solo in fondo alla pagina
+      if(pieno()||(k.conProssimo&&usato()>corpo.clientHeight-110)){corpo.removeChild(el);nuova(false);corpo.appendChild(el)}continue}
+    if(k.tab){if(!tab||tabK!==k.tab){tab=document.createElement('table');tab.className=k.cls;tab.innerHTML=k.testa+'<tbody></tbody>';corpo.appendChild(tab);tabK=k.tab}
+      var tb=tab.tBodies[0];tb.insertAdjacentHTML('beforeend',k.riga);
+      if(pieno()){tb.removeChild(tb.lastElementChild);if(!tb.rows.length)corpo.removeChild(tab);
+        nuova(false);tab=document.createElement('table');tab.className=k.cls;tab.innerHTML=k.testa+'<tbody>'+k.riga+'</tbody>';corpo.appendChild(tab);tabK=k.tab}}}
+  pagine.forEach(function(p,i){p.querySelector('.pn').textContent=D.cod+' · pagina '+(i+1)+' di '+pagine.length});
+  return pagine}
+
+function pdfCarica(src){return new Promise(function(ok,no){if(window.html2pdf)return ok();var s=document.createElement('script');s.src=src;s.onload=function(){ok()};s.onerror=function(){no(new Error('Non riesco a caricare il generatore di PDF. Controlla la connessione e riprova.'))};document.head.appendChild(s)})}
+function pdfLogo(){if(PDF_LOGO)return Promise.resolve();return fetch(new URL('../coach/logo-pdf.png',location.href).href).then(function(r){if(!r.ok)throw new Error('logo');return r.blob()}).then(function(b){return new Promise(function(ok){var f=new FileReader();f.onload=function(){PDF_LOGO=f.result;ok()};f.readAsDataURL(b)})})}
+
+// crea il file: una pagina A4 alla volta, cosi' nessuna riga viene tagliata a meta'
+function pdfCrea(D){var box=document.createElement('div');box.className='pdf-contenitore';box.style.cssText='position:fixed;left:-10000px;top:0;width:210mm;z-index:-1';
+  box.innerHTML='<style>'+PDF_CSS+'</style>';document.body.appendChild(box);
+  var pagine=pdfImpagina(box,D);
+  var opt={margin:0,image:{type:'jpeg',quality:0.95},html2canvas:{scale:2.4,useCORS:true,backgroundColor:'#ffffff',logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true}};
+  var w=window.html2pdf().set(opt).from(pagine[0]).toPdf();
+  pagine.slice(1).forEach(function(p){w=w.get('pdf').then(function(pdf){pdf.addPage()}).from(p).toContainer().toCanvas().toPdf()});
+  return w.outputPdf('blob').then(function(b){box.remove();return b},function(e){box.remove();throw e})}
+
+function pdfConsegna(blob,nome){var f=null;try{f=new File([blob],nome,{type:'application/pdf'})}catch(e){}
+  var tocco=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+  // telefono: foglio di condivisione (Salva su File, WhatsApp, Stampa); computer: scarica il file
+  if(tocco&&f&&navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f],title:nome}).catch(function(e){if(e&&e.name==='AbortError')return;pdfScarica(blob,nome)});
+  pdfScarica(blob,nome);return Promise.resolve()}
+function pdfScarica(blob,nome){var u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},60000)}
+
+function coEsportaPdf(){var P=CO.prog,b=$('coPdf');if(!P)return;var D=pdfDati(P,CO.cod||'',(CO.cli&&CO.cli.nome)||'');
+  if(!D.sedute.length){toast('Il programma non ha ancora esercizi da mettere nel PDF.');return}
+  if(b){b.disabled=true;b.textContent='Preparo il PDF...'}
+  var fine=function(){if(b){b.disabled=false;b.textContent='Esporta PDF'}};
+  Promise.all([pdfCarica(new URL('../check/vendor/html2pdf.bundle.min.js',location.href).href),pdfLogo()]).then(function(){return pdfCrea(D)}).then(function(blob){
+    var nome='Programma_'+(D.cod||'cliente')+(P.inizio?'_'+P.inizio:'')+'.pdf';fine();
+    if(CO.sporco)toast('Nel PDF ci sono anche le modifiche non ancora salvate');
+    return pdfConsegna(blob,nome)}).catch(function(e){fine();toast(e&&e.message&&!/logo/.test(e.message)?e.message:'Non sono riuscito a creare il PDF. Riprova.')})}
+
+// pulsante accanto a "Salva come modello", anche dal telefono
+(function(){var o=window.rProg;if(typeof o!=='function')return;
+  window.rProg=function(){var r=o.apply(this,arguments);var m=$('coSalvaMod');
+    if(m&&!$('coPdf')){m.insertAdjacentHTML('afterend','<button class="co-btn" id="coPdf" title="Scarica il programma in PDF, da mandare al cliente o stampare">Esporta PDF</button>');$('coPdf').onclick=coEsportaPdf}
+    return r}})();
+
 // ---------- rifiniture per telefono (27/11). Aggiunta da tools/porta-pagina.py
 // Le file che scorrono di lato (giorni degli appuntamenti, schede dell'area coach) mostrano una sfumatura solo dal lato dove c'e' altro,
 // e la scheda scelta resta visibile.
