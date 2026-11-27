@@ -17,30 +17,106 @@
   .sub{color:var(--tenue);margin:0 0 8px}
   ul{padding-left:20px}
   a{color:inherit}
+  table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:15px}
+  th,td{text-align:left;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--riga)}
+  th{color:var(--tenue);font-weight:600}
+  .scorri{overflow-x:auto}
+  .bozza{border:1px solid var(--riga);border-radius:12px;padding:10px 14px;color:var(--tenue);font-size:14px}
   footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--riga);color:var(--tenue);font-size:14px}
 </style>
 </head>
 <body>
 <main>
   <img src="icona-180.png" alt="MS Coaching">
-  <h1>Privacy</h1>
-  <p class="sub">App di allenamento MS Coaching · aggiornata il 24/11/2026</p>
+  <h1>Informativa privacy</h1>
+  <p class="sub">MS Coaching · mscoaching-app.it · aggiornata il 27/11/2026</p>
+  <p class="bozza">Versione in revisione da parte del consulente privacy. Se cambia in modo importante, il sito te lo mostra al primo accesso e ti chiede di nuovo i consensi.</p>
 
-  <h2>Collegamento con Google</h2>
-  <p>L'app di prenotazione degli appuntamenti di MS Coaching si collega soltanto all'account Google del coach, mai a quello dei clienti. Lo usa per:</p>
+  <h2>Titolare del trattamento</h2>
+  <p>Il titolare dei tuoi dati è <b>Mattias Sula</b>, personal trainer libero professionista (partita IVA 01843670082), che opera con il nome MS Coaching.</p>
   <ul>
-    <li>leggere nel calendario del coach gli eventi "Disponibile", cioè gli orari in cui si possono chiedere appuntamenti;</li>
-    <li>creare, aggiornare ed eliminare nel calendario del coach gli eventi degli appuntamenti richiesti dai clienti. Questi eventi contengono solo il codice cliente, mai nome o altri dati personali;</li>
-    <li>mandare al coach un'email quando arriva una nuova richiesta.</li>
+    <li>Indirizzo: Piazza Giuseppe Garibaldi 29, 18012 Bordighera (IM), Italia</li>
+    <li>Email per la privacy: <a href="mailto:mattias.sulapt@gmail.com">mattias.sulapt@gmail.com</a></li>
   </ul>
-  <p>I dati ricevuti da Google non vengono venduti, condivisi con altri o usati per pubblicità. Sul server (Supabase, nell'Unione Europea) si conserva solo il codice di collegamento che permette queste operazioni.</p>
-  <p>L'uso delle informazioni ricevute dalle API di Google rispetta le <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, compresi i requisiti di Limited Use.</p>
-  <p>Il collegamento si può togliere in qualsiasi momento da <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
+  <p>Non è stato nominato un responsabile della protezione dei dati (DPO), perché non è obbligatorio per questa attività. Per domande sui tuoi dati puoi scrivere all'email qui sopra o al tuo coach nella chat del sito.</p>
 
-  <h2>Clienti dell'app</h2>
-  <p>L'informativa completa sul trattamento dei dati dei clienti (allenamenti, misure, foto di progresso) sarà pubblicata su questa pagina prima del lancio dell'app negli store.</p>
+  <h2>Quali dati raccogliamo</h2>
+  <p>Raccogliamo solo i dati che servono a seguirti nel percorso di allenamento. Nel sito sei identificato da un <b>codice cliente</b> (per esempio C012), non dal tuo nome.</p>
+  <div class="scorri"><table>
+    <tr><th>Tipo di dato</th><th>Esempi</th><th>Da dove arriva</th></tr>
+    <tr><td>Account</td><td>email, password (salvata cifrata, nessuno la può leggere), codice cliente, nome visualizzato se lo scegli</td><td>da te e dal coach quando ti invita</td></tr>
+    <tr><td>Allenamento</td><td>programma, sedute fatte, carichi, ripetizioni, note sugli esercizi, video di esecuzione che carichi</td><td>da te e dal coach</td></tr>
+    <tr><td>Corpo e salute</td><td>peso, circonferenze, composizione corporea (BIA, pliche), test fisici, dolori che segnali, risposte alle domande prima della seduta</td><td>da te e dal coach durante i check</td></tr>
+    <tr><td>Scheda del check</td><td>nome, dati anagrafici e anamnesi raccolti dal coach durante il check</td><td>dal coach, visibili solo a lui</td></tr>
+    <tr><td>Foto dei progressi</td><td>foto frontale, laterale e posteriore</td><td>da te o dal coach, solo con il tuo consenso</td></tr>
+    <tr><td>Comunicazioni</td><td>messaggi e foto in chat, appuntamenti, promemoria, questionari segnati come fatti</td><td>da te e dal coach</td></tr>
+    <tr><td>Percorso</td><td>obiettivo, scadenza del percorso, avviso di pagamento in sospeso</td><td>dal coach</td></tr>
+    <tr><td>Uso del sito</td><td>codice per le notifiche del browser, orario del promemoria, data dell'ultimo accesso, consensi dati</td><td>dal tuo browser</td></tr>
+  </table></div>
+  <p>Le risposte ai questionari non passano dal sito: le compili in Google Moduli e restano nell'account Google del coach, collegate al tuo codice cliente. Non raccogliamo dati di pagamento, posizione o contatti della rubrica.</p>
 
-  <footer>Per domande sulla privacy scrivi al tuo coach MS Coaching.</footer>
+  <h2>Perché usiamo i tuoi dati e su quale base</h2>
+  <div class="scorri"><table>
+    <tr><th>Finalità</th><th>Base giuridica</th></tr>
+    <tr><td>Creare il tuo account e farti usare il sito</td><td>contratto di coaching (art. 6.1.b GDPR)</td></tr>
+    <tr><td>Preparare e adattare il programma, seguire i progressi, fare i check</td><td>contratto (art. 6.1.b) e, per i dati sulla salute, il tuo consenso esplicito (art. 9.2.a)</td></tr>
+    <tr><td>Conservare le foto dei progressi</td><td>il tuo consenso esplicito, facoltativo (art. 9.2.a)</td></tr>
+    <tr><td>Bozza della valutazione dei check con intelligenza artificiale</td><td>il tuo consenso esplicito, facoltativo (art. 9.2.a)</td></tr>
+    <tr><td>Chat, appuntamenti, promemoria e notifiche</td><td>contratto (art. 6.1.b)</td></tr>
+    <tr><td>Sicurezza del sito e prevenzione degli abusi</td><td>legittimo interesse del titolare (art. 6.1.f)</td></tr>
+    <tr><td>Obblighi di legge</td><td>obbligo legale (art. 6.1.c)</td></tr>
+  </table></div>
+  <p>I dati sulla salute (peso, misure, composizione corporea, dolori, anamnesi) li trattiamo solo dopo il tuo consenso esplicito, che dai al primo accesso. Senza questo consenso non è possibile seguirti con il sito, perché il programma si basa proprio su questi dati. Puoi ritirarlo quando vuoi eliminando l'account; il ritiro non rende illegittimo quello che è stato fatto prima.</p>
+  <p>Il coach non dà diagnosi né consigli medici: se segnali un dolore, il sito ti invita a parlarne con lui e, se serve, con un medico. I tuoi dati non vengono venduti, non sono usati per pubblicità e non servono a prendere decisioni automatiche che ti riguardano.</p>
+
+  <h2>Valutazione dei check con intelligenza artificiale</h2>
+  <p>Solo se dai il consenso facoltativo, dopo un check il coach può chiedere a un servizio di intelligenza artificiale (Claude, di Anthropic) una prima bozza della valutazione. Il coach la rilegge e la corregge sempre prima che ti arrivi.</p>
+  <ul>
+    <li>All'AI arrivano solo il tuo codice cliente e i dati del check (misure, composizione corporea, test, risposte su benessere e aderenza, obiettivo). Non arrivano il tuo nome, i tuoi contatti né le tue foto.</li>
+    <li>Il sito non salva nulla presso Anthropic, che come fornitore del servizio non usa questi dati per addestrare i propri modelli.</li>
+    <li>Puoi dare o togliere questo consenso quando vuoi dal Profilo, in "Privacy e consensi". Senza consenso il coach scrive la valutazione a mano.</li>
+  </ul>
+
+  <h2>Chi altro tratta i tuoi dati</h2>
+  <p>I tuoi dati li vedete solo tu e il tuo coach. Per far funzionare il sito usiamo questi fornitori, nominati responsabili del trattamento (art. 28 GDPR):</p>
+  <div class="scorri"><table>
+    <tr><th>Fornitore</th><th>Cosa fa</th><th>Dove</th></tr>
+    <tr><td>Supabase</td><td>database, accesso, file (foto, video, PDF), funzioni del server</td><td>Unione Europea (Irlanda)</td></tr>
+    <tr><td>Google Firebase Cloud Messaging</td><td>consegna delle notifiche al tuo browser; riceve solo un codice tecnico del dispositivo e un testo senza dati personali</td><td>UE e USA</td></tr>
+    <tr><td>Google Calendar, Gmail, Moduli</td><td>appuntamenti nel calendario del coach (solo con il codice cliente), email di recupero password, questionari</td><td>UE e USA</td></tr>
+    <tr><td>Anthropic</td><td>bozza della valutazione dei check, solo con il tuo consenso e solo con il codice cliente</td><td>USA</td></tr>
+    <tr><td>GitHub (Microsoft)</td><td>pubblica le pagine del sito; vede l'indirizzo IP di chi le apre, come ogni sito</td><td>UE e USA</td></tr>
+  </table></div>
+  <p>Per i trattamenti negli Stati Uniti i fornitori usano il Data Privacy Framework UE-USA o le clausole contrattuali standard della Commissione europea. I tuoi dati non sono comunicati ad altri, salvo richieste delle autorità previste dalla legge.</p>
+
+  <h2>Per quanto tempo teniamo i dati</h2>
+  <ul>
+    <li>Finché sei cliente e il tuo account è attivo.</li>
+    <li>Dopo la fine del percorso: 24 mesi, così se riprendi ritrovi i tuoi progressi; poi vengono cancellati.</li>
+    <li>Se elimini l'account: cancellazione immediata di account, dati, foto, video e chat. Le copie di sicurezza del database vengono sovrascritte entro 7 giorni.</li>
+    <li>Richieste di recupero password e tentativi di accesso: pochi giorni, solo per sicurezza.</li>
+  </ul>
+  <p>I documenti fiscali (fatture e ricevute) non sono nel sito: il coach li conserva a parte per il tempo previsto dalla legge.</p>
+
+  <h2>I tuoi diritti</h2>
+  <p>Puoi chiedere in qualsiasi momento di accedere ai tuoi dati, correggerli, cancellarli, limitarne l'uso, opporti al trattamento basato sul legittimo interesse e riceverli in un formato leggibile. Puoi ritirare i consensi: il ritiro non vale per il passato. Dal <b>Profilo</b> del sito puoi da solo:</p>
+  <ul>
+    <li><b>Scaricare i tuoi dati</b> in un file (allenamenti, misure, chat, appuntamenti, consensi);</li>
+    <li>dare o togliere i consensi facoltativi (foto e valutazione con AI);</li>
+    <li><b>eliminare l'account</b> e tutti i dati, anche senza entrare nel sito, dalla pagina <a href="elimina-account.html">mscoaching-app.it/elimina-account.html</a>.</li>
+  </ul>
+  <p>Per tutto il resto scrivi a <a href="mailto:mattias.sulapt@gmail.com">mattias.sulapt@gmail.com</a>: rispondiamo entro 30 giorni. Puoi anche presentare reclamo al Garante per la protezione dei dati personali (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).</p>
+
+  <h2>Sicurezza, minori e altre informazioni</h2>
+  <p><b>Sicurezza.</b> I dati viaggiano cifrati (HTTPS). Ogni cliente vede solo i propri dati e il coach solo quelli dei suoi clienti: lo controlla il database stesso. Foto, video e documenti stanno in archivi privati, aperti solo con link temporanei.</p>
+  <p><b>Minori.</b> Il servizio è per maggiorenni. Un minore può essere seguito solo con il consenso di chi esercita la responsabilità genitoriale.</p>
+  <p><b>Notifiche.</b> Le notifiche del browser (messaggi del coach, appuntamenti, programma, promemoria allenamento) arrivano solo se le attivi e puoi spegnerle quando vuoi. I testi non contengono dati personali, perché possono comparire sullo schermo bloccato.</p>
+  <p><b>Cookie e memoria del browser.</b> Il sito non usa cookie di profilazione né strumenti di statistica o pubblicità. Usa solo la memoria del browser per tenerti connesso, ricordare le tue impostazioni e funzionare anche senza rete: sono strumenti tecnici necessari, per i quali non serve consenso. I caratteri tipografici sono caricati dal nostro sito, non da servizi esterni.</p>
+
+  <h2>Collegamento con Google (per il coach)</h2>
+  <p>La prenotazione degli appuntamenti si collega soltanto all'account Google del coach, mai a quello dei clienti. Lo usa per leggere nel calendario del coach gli orari "Disponibile", creare, aggiornare ed eliminare gli eventi degli appuntamenti (che contengono solo il codice cliente) e mandare al coach un'email quando arriva una richiesta. I dati ricevuti da Google non vengono venduti, condivisi o usati per pubblicità; sul server si conserva solo il codice di collegamento. L'uso delle informazioni ricevute dalle API di Google rispetta le <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, compresi i requisiti di Limited Use. Il collegamento si può togliere da <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</p>
+
+  <footer>MS Coaching · Mattias Sula · P.IVA 01843670082 · Piazza Giuseppe Garibaldi 29, 18012 Bordighera (IM)</footer>
 </main>
 </body>
 </html>
