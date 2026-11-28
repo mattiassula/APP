@@ -1,0 +1,1 @@
+import"./dist-DKQ6MUN9.js";import"./main-FXOYXtMJ.js";window.CK_ESTERNA=window.parent===window;function e(e){return/^ACCESSO\|/.test(e)||/permission denied|non e' un coach|Solo il coach/i.test(e)}window.CK_SENZA_ACCESSO=e;
