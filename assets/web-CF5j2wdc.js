@@ -1,0 +1,1 @@
+import{i as e}from"./main-MZYvv2TP.js";var t=class extends e{async show(e){}async hide(e){}};export{t as SplashScreenWeb};
